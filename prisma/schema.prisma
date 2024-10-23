@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String               @id @default(uuid())
+  fullname          String           
+  clerkId   String   @unique
+  email   String   @unique
+  password      String
+  type      String
+  balance           Float              @default(0)
+  kycApproved       Boolean            @default(false)
+  role      Role   @default(USER)
+  profile           Profile?
+  transactions      Transaction[]
+  deposits          Deposit[]
+  status            Actions @default(ACTIVE)
+  withdrawals       Withdrawal[]
+  investments       Investment[]
+  kyc               KYCVerification?
+  referrals         Referral[]         @relation("Referrer")
+  referredBy        Referral?          @relation("Referred")
+  notifications     Notification[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Profile {
+  id               String    @id @default(uuid())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String      @unique
+  clerkId          String?
+  fullName         String?
+  email            String?
+  address          String?
+  country          String?
+  state            String?
+  city             String?
+  zipCode          String?
+  phoneNumber      String?
+  walletAddress    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Transaction {
+  id          String      @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  userId      String
+  amount      Float
+  type        TransactionType   // 'deposit', 'withdrawal', 'investment'
+  currency    String?
+  status      TransactionStatus
+  createdAt   DateTime @default(now())
+ 
+}
+
+
+
+model Deposit {
+  id        String         @id @default(uuid())
+  amount    String
+  currency  String
+  status    TransactionStatus  @default(PENDING)
+  createdAt DateTime @default(now())
+
+  userId  String?
+  User   User?   @relation(fields: [userId], references: [clerkId],  onDelete: Cascade)
+
+
+}
+
+
+
+
+model Withdrawal {
+  id             String     @id @default(uuid())
+  user           User?     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  userId         String?
+  amount         String
+  walletAddress  String
+  status         TransactionStatus   // 'pending', 'completed', 'failed'
+  createdAt      DateTime @default(now())
+
+}
+
+
+
+model Investment {
+  id        String   @id @default(uuid())
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  user        User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  userId      String
+  amount    Float
+  startDate     DateTime @default(now())
+  endDate       DateTime
+  status        InvestmentStatus  @default(ACTIVE) 
+  accumulatedInterest Float @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id                String      @id @default(uuid())
+  name              String
+  shortName         String?
+  description       String?
+  minAmount         Float
+  maxAmount         Float
+  duration          Int?        // in days
+  interestRate      Float
+  interestPeriod    String      // e.g., "Hourly", "Daily", "Monthly"
+  payoutTerm        String      // e.g., "Term basis"
+  termDuration      Int
+  termDurationType  String      // e.g., "Hours", "Days", "Months", "Years"
+  capitalReturn     String?      // e.g., "Partial / Each Term", "Full / End of Term"
+  profitAdjust      String?     // e.g., "Hourly (Term basis)", "Daily (Term basis)"
+  isFixedInvestment Boolean     @default(false)
+  returnCapital     Boolean     @default(true)
+  isFeatured        Boolean     @default(false)
+  isActive          Boolean     @default(true)
+  maxInvestmentTimes Int?
+  maxPerUser        Int?
+  investments       Investment[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+
+model Referral {
+  id          String      @id @default(uuid())
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referrerId  String
+  referred    User     @relation("Referred", fields: [referredId], references: [id], onDelete: Cascade)
+  referredId  String      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String      @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id        String     @id @default(uuid())
+  email     String    @unique
+  password  String?
+  fullname  String?    
+  clerkId   String?
+  type      String?
+  role      Role?   @default(ADMIN)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @updatedAt
+  
+}
+
+
+
+model SiteSetting {
+  id                String      @id @default(uuid())
+  kycEnabled        Boolean  @default(true)
+  logo              String?
+  enabledPayments   String[]
+  emailSmtp         Json?
+  referralReward    Float?
+  tawkApiKey        String?
+  themeSettings     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+
+model PaymentMethod {
+  id            String   @id @default(uuid())
+  name          String
+  walletAddress String
+  currency      Currency @relation(fields: [currencyId], references: [id])
+  currencyId    String
+  isEnabled     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Currency {
+  id             String          @id @default(uuid())
+  name           String
+  symbol         String
+  paymentMethods PaymentMethod[]
+  isEnabled      Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Page {
+  id        String     @id @default(uuid())
+  title     String
+  content   String
+  slug      String   @unique
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailTemplate {
+  id        String     @id @default(uuid())
+  name      String
+  subject   String
+  content   String
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model KYCVerification {
+  id               String    @id @default(uuid())
+  user             User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  userId           String      @unique
+  clerkId      String?
+  fullName      String
+  dateOfBirth   String
+  nationality   String
+  streetAddress String
+  city          String
+  postalCode    String
+  country       String
+  idFrontUrl    String
+  idBackUrl     String
+  selfieUrl     String
+  status        VerificationStatus? @default(PENDING)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime? @updatedAt
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum Actions {
+  ACTIVE
+  LOCKED
+  SUSPENDED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INVESTMENT 
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
