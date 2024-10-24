@@ -13,7 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Stellar Vault",
+  title: "Sphera Vault",
   description: "Best Trading Platfrom across the globe",
   icons: {
     icon: '/logo.png'

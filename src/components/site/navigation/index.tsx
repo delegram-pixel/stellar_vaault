@@ -16,21 +16,21 @@ const Navbar = async ({ user }: Props) => {
     <div className="p-4 fixed top-0 left-0 right-0 z-10 bg-white dark:bg-[#03070f] z-10 flex items-center justify-between">
       <aside className="flex items-center gap-2">
         <Image
-          src={"/assets/plura-logo.svg"}
+          src={"/logo.png"}
           alt="image"
           width={40}
           height={40}
         />
-        <span className="text-xl font-bold ">Stellar Vault.</span>
+        <span className="text-xl font-bold ">Sphera  Vault.</span>
       </aside>
 
       <nav className="hidden md:block absolute left-[50%] top-[50%] transform translate-x-[-50%]  translate-y-[-50%] ">
         <ul className="flex items-center justify-center gap-8">
-          <Link href={"#"}> Market </Link>
-          <Link href={"#"}> Trading Platform </Link>
-          <Link href={"#"}> Trading with us </Link>
-          <Link href={"#"}> Company </Link>
-          <Link href={"#"}> Contact </Link>
+          <Link href={"#"}> Home </Link>
+          <Link href={"#investment"}> Investments </Link>
+          <Link href={"#about"}> About Us </Link>
+          <Link href={"#company"}> Company </Link>
+          <Link href={"#contact"}> Contact </Link>
         </ul>
       </nav>
       <aside className="flex gap-2 items-center">

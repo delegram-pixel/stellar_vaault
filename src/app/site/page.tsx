@@ -326,11 +326,11 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className=" text-white py-16">
+      <footer className="  py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-12">
             <div>
-              <h3 className="text-xl font-bold mb-4">Stellar Vault</h3>
+              <h3 className="text-xl font-bold mb-4">Sphera  Vault</h3>
               <p className="text-gray-400">
                 Building financial futures through smart investing.
               </p>
@@ -340,7 +340,7 @@ export default function Home() {
             </div>
             <div>
               <h4 className="font-bold mb-4">Products</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 ">
                 <li className="hover:text-white cursor-pointer">
                   Stocks & ETFs
                 </li>
@@ -373,13 +373,13 @@ export default function Home() {
                 </p>
                 <p className="flex items-center">
                   <Mail className="h-5 w-5 mr-2" />
-                  support@investsmart.com
+                  support@spheravault.com
                 </p>
               </div>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>© 2024 Stellar Vault. All rights reserved.</p>
+            <p>© 2024 Sphera Vault. All rights reserved.</p>
           </div>
         </div>
       </footer>

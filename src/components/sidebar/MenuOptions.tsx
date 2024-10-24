@@ -78,7 +78,7 @@ const MenuOptions = ({
         <div>
           <div className="flex items-center gap-2 my-4">
             <Compass />
-            <h1 className="font-bold">Stellar Vault.</h1>
+            <h1 className="font-bold">Sphera  Vault.</h1>
           </div>
 
           <p className="text-muted-foreground text-xs mb-2">MENU LINKS</p>
