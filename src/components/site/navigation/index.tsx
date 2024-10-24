@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { ModeToggle } from "@/components/global/mode-toogle";
 import { currentUser } from "@clerk/nextjs/server";
+import {  AdminLoginUserSidebar,  onLoginUserSidebar } from "@/actions/auth";
 
 interface Props {
   user?: null | User;
@@ -12,6 +13,8 @@ interface Props {
 
 const Navbar = async ({ user }: Props) => {
   const authUser = await currentUser();
+  const authenticated = await AdminLoginUserSidebar();
+  const authenticatedUser = await onLoginUserSidebar()
   return (
     <div className="p-4 fixed top-0 left-0 right-0 z-10 bg-white dark:bg-[#03070f] z-10 flex items-center justify-between">
       <aside className="flex items-center gap-2">
@@ -34,25 +37,38 @@ const Navbar = async ({ user }: Props) => {
         </ul>
       </nav>
       <aside className="flex gap-2 items-center">
-        {authUser ? (
-          <div>
-            <Link
-              href={"/dashboard"}
-              className="bg-primary text-white p-2 px-4 hover:bg-primary/80 rounded-md"
-            >
-              Dashboard
-            </Link>
-          </div>
-        ) : (
-          <div>
-            <Link
-              href={"/sign-in"}
-              className="bg-primary text-white p-2 px-4 hover:bg-primary/80 rounded-md"
-            >
-              Login
-            </Link>
-          </div>
-        )}
+       
+      {authenticated ? (
+  // Admin view
+  <div>
+    <Link
+      href={"/admin/dashboard"}
+      className="bg-primary text-white p-2 px-4 hover:bg-primary/80 rounded-md"
+    >
+      Admin Dashboard
+    </Link>
+  </div>
+) : authenticatedUser ? (
+  // Regular user view
+  <div>
+    <Link
+      href={"/dashboard"}
+      className="bg-primary text-white p-2 px-4 hover:bg-primary/80 rounded-md"
+    >
+       Dashboard
+    </Link>
+  </div>
+) : (
+  // Not authenticated view
+  <div>
+    <Link
+      href={"/sign-in"}
+      className="bg-primary text-white p-2 px-4 hover:bg-primary/80 rounded-md"
+    >
+      Login
+    </Link>
+  </div>
+)}
 
         <UserButton afterSignOutUrl="/" />
         <ModeToggle />

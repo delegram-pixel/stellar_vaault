@@ -33,11 +33,11 @@ import {
 export default function Home() {
   const testimonials = [
     {
-      name: "Sarah Johnson",
-      role: "Small Business Owner",
+      name: "Ben Armstrong",
+      role: "Crypto Expert",
       comment:
         "This platform transformed how I manage my investments. The returns have been exceptional!",
-      image: "/avatar/1.avif",
+      image: "/armstrong.jpg",
       portfolio: "+45% growth",
       yearsActive: "2 years",
     },
@@ -98,7 +98,7 @@ export default function Home() {
   ];
   return (
     <>
-      <section className="h-full w-full pt-10 xl:pt-36 lg:pt-36  relative flex items-center justify-center flex-col">
+      <section id="home" className="h-full w-full pt-10 xl:pt-36 lg:pt-36  relative flex items-center justify-center flex-col">
         <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#161616_1px,transparent_1px),linear-gradient(to_bottom,#161616_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] -z-10" />
 
         <p className="text-center text-sm ">Leading Platform</p>
@@ -116,7 +116,7 @@ export default function Home() {
       </section>
 
     <section>
-    <div className="h-full w-full p-10 xl:pt-36 lg:pt-10">
+    <div id="about" className="h-full w-full p-10 xl:pt-36 lg:pt-10">
         <div className="flex md:flex-row flex-col gap-10">
         <div>
         <Image
@@ -199,11 +199,11 @@ export default function Home() {
     </section>
 
     <section>
-      <InvestmentHero/>
+      <InvestmentHero id="investment"/>
       </section>  
 
       {/* Features Section */}
-      <section className="py-20">
+      <section className="py-20" id="company">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4">
@@ -244,6 +244,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
 
       {/* Testimonials Section */}
       <section className="py-20 ">
@@ -303,6 +304,14 @@ export default function Home() {
           </Carousel>
         </div>
       </section>
+
+
+     <div className="flex items-center mb-3 justify-center">
+      <Image src="/cert9.png" alt="certificate"   width={500}
+            height={500}
+            className="w-[200px]" />
+
+      </div>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white">

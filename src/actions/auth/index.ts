@@ -155,6 +155,62 @@ export const AdminLoginUser = async () => {
     }
   }
 }
+
+
+export const AdminLoginUserSidebar = async () => {
+
+  const user = await currentUser()
+  if (!user) return null;
+
+  else {
+    try {
+      const authenticated = await client.admin.findUnique({
+        where: {
+          id: user.id,
+        },
+        select: {
+          fullname: true,
+          id: true,
+      
+        },
+      })
+      if (authenticated) {
+    
+        return { status: 200, user: authenticated }
+      }
+    } catch (error) {
+      return { status: 400 }
+    }
+  }
+}
+
+
+export const onLoginUserSidebar = async () => {
+
+  const user = await currentUser()
+  if (!user) return null;
+  else {
+    try {
+      const authenticated = await client.user.findUnique({
+        where: {
+          clerkId: user.id,
+        },
+        select: {
+          fullname: true,
+          id: true,
+          type: true,
+          clerkId: true
+        },
+      })
+      if (authenticated) {
+    
+        return { status: 200, user: authenticated }
+      }
+    } catch (error) {
+      return { status: 400 }
+    }
+  }
+}
 export const UserId = async () => {
 
   const user = await currentUser()

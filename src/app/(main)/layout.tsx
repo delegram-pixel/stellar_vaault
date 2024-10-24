@@ -16,8 +16,7 @@ const layout = async ({children}: Props) => {
 
     const authenticated = await onLoginUser()
 
-    if (!authenticated) return null;
-
+    if (!authenticated) redirect("/");
 
  
     return (
