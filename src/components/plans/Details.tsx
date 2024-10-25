@@ -92,7 +92,7 @@ const Details = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "An error occured try again!!!",
         variant: "destructive",
       });
     }
