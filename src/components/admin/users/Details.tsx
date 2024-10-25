@@ -73,7 +73,7 @@ const UserDetails: React.FC<UserDetailsProps> = async ({ user }) => {
           </TabsTrigger>
           <TabsTrigger
             value="transactions"
-            className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+            className="rounded-full hiddden px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             Transactions
           </TabsTrigger>
