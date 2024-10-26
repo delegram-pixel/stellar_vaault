@@ -78,7 +78,7 @@ const getAllTransaction  = await getAlTransactions()
               </small>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              This is how may deposit you made
+            Here’s a summary of your recent deposits.
             </CardContent>
           </Card>
 
