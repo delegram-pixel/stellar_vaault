@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster"
 import { ClerkProvider } from "@clerk/nextjs";
+import JivoChat from "../components/site/JivoChat";
 
 
 const poppins = Poppins({
@@ -37,6 +38,7 @@ export default function RootLayout({
             disableTransitionOnChange
           > 
             {children}
+            <JivoChat/>
             <Toaster />
           </ThemeProvider>
         </body>
