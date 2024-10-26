@@ -38,7 +38,7 @@ const WithdrawSec =  async () => {
           <p className="text-2xl font-semibold">Withdraw </p>
           <p className="text-sm text-slate-400">
             {" "}
-            To withdraw funds input your wallet address, please contact our support team to assist you with your withdrawal.
+          To withdraw funds input your wallet address, please contact our support team to assist you with your withdrawal.
 
 
           </p>
