@@ -38,6 +38,7 @@ const WithdrawSec =  async () => {
           <p className="text-2xl font-semibold">Withdraw </p>
           <p className="text-sm text-slate-400">
             {" "}
+            The funds will be withdrawn only from your Interest Wallet. So make sure that you have sufficient balance in the Interest wallet.
           To withdraw funds input your wallet address, please contact our support team to assist you with your withdrawal.
 
 
