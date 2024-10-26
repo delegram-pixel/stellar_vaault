@@ -78,7 +78,7 @@ const WithdrawForm = () => {
           });
     
           toast({
-            title: "Withdrawal Sucessful",
+            title: "Withdrawal Pending",
           });
     
           router.push("/dashboard");
