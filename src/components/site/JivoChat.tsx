@@ -1,10 +1,12 @@
+"use client";
 import React from 'react';
-import Head from 'next/head';
+
+
 
 const JivoChat: React.FC = () => {
   return (
     <div>
-     <script src="//code.jivosite.com/widget/" async></script>
+    <script src="//code.jivosite.com/widget/k2ZFhHGvc6" async></script>
 
     </div>
   );
