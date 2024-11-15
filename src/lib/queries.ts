@@ -1216,6 +1216,7 @@ export async function getInvestments(userId: string) {
   }
 }
 
+
 export async function getUserInvestmentData(userId: string) {
   const investments = await client.investment.findMany({
     where: { userId: userId },
