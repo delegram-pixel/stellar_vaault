@@ -1128,7 +1128,7 @@ export async function createInvestment(userId:string, planId: string, amount: nu
     throw error;
   }
 }
-// Calculate interest for active investments
+
 export async function calculateInterest() {
   const activeInvestments = await client.investment.findMany({
     where: { status: "ACTIVE" },
@@ -1136,8 +1136,8 @@ export async function calculateInterest() {
   });
 
   for (const investment of activeInvestments) {
-    const interestRate = investment.plan.interestRate / 100; // Convert percentage to decimal
-    const dailyRate = interestRate / 365; // Assuming yearly rate
+    const interestRate = investment.plan.interestRate / 100;
+    const dailyRate = interestRate / 365;
     const daysActive = Math.floor((Date.now() - investment.startDate.getTime()) / (1000 * 60 * 60 * 24));
     const interest = investment.amount * dailyRate * daysActive;
 
@@ -1152,7 +1152,6 @@ export async function calculateInterest() {
   }
 }
 
-// Complete an investment
 async function completeInvestment(investmentId: string) {
   const investment = await client.investment.findUnique({
     where: { id: investmentId },
@@ -1164,13 +1163,11 @@ async function completeInvestment(investmentId: string) {
   const totalReturn = investment.amount + investment.accumulatedInterest;
 
   await client.$transaction(async (tx) => {
-    // Update investment status
     await tx.investment.update({
       where: { id: investmentId },
       data: { status: "COMPLETED" },
     });
 
-    // Return funds to user
     await tx.user.update({
       where: { id: investment.userId },
       data: { balance: { increment: totalReturn } },
@@ -1178,7 +1175,6 @@ async function completeInvestment(investmentId: string) {
   });
 }
 
-// Helper function to calculate end date
 function calculateEndDate(duration: number, durationType: string): Date {
   const endDate = new Date();
   switch (durationType) {
@@ -1200,9 +1196,6 @@ function calculateEndDate(duration: number, durationType: string): Date {
   return endDate;
 }
 
-
-
-
 export async function getInvestments(userId: string) {
   try {
     const investments = await client.investment.findMany({
@@ -1220,10 +1213,8 @@ export async function getInvestments(userId: string) {
   } catch (error) {
     console.error('Error fetching investments:', error);
     throw error;
-  
+  }
 }
-}
-
 
 export async function getUserInvestmentData(userId: string) {
   const investments = await client.investment.findMany({
@@ -1234,7 +1225,6 @@ export async function getUserInvestmentData(userId: string) {
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const totalProfit = investments.reduce((sum, inv) => sum + inv.accumulatedInterest, 0);
 
-  // Get available funds (assuming you have a user balance field)
   const user = await client.user.findUnique({
     where: { id: userId },
     select: { balance: true }
@@ -1246,7 +1236,6 @@ export async function getUserInvestmentData(userId: string) {
     totalProfit
   };
 }
-
 
 
 export async function PaymentDc(data: any) {
