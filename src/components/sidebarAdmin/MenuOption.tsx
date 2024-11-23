@@ -5,8 +5,6 @@ import { Sheet, SheetClose, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { Compass, Menu } from "lucide-react";
 import clsx from "clsx";
-import { AspectRatio } from "../ui/aspect-ratio";
-import Image from "next/image";
 import Link from "next/link";
 import { Separator } from "../ui/separator";
 import { icons } from "@/lib/constant";
@@ -21,16 +19,9 @@ import {
 
 type Props = {
   defaultOpen?: boolean;
-
 };
 
-// First create the icons array in /lib/constant.ts:
-// Copy the entire icons array from my previous response into /lib/constant.ts
-
-const MenuOptions = ({
-
-  defaultOpen,
-}: Props) => {
+const MenuOptions = ({ defaultOpen }: Props) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -79,7 +70,7 @@ const MenuOptions = ({
         <div>
           <div className="flex items-center gap-2 my-4">
             <Compass />
-            <h1 className="font-bold">Sphera  Vault.</h1>
+            <h1 className="font-bold">Sphera Vault.</h1>
           </div>
 
           <p className="text-muted-foreground text-xs mb-2">MENU LINKS</p>
@@ -103,13 +94,15 @@ const MenuOptions = ({
                         key={option.id}
                         className="md:w-[320px] w-full"
                       >
-                        <Link
-                          href={option.link}
-                          className="flex items-center gap-2 hover:bg-transparent rounded-md transition-all md:w-full w-[320px]"
-                        >
-                          {val}
-                          <span>{option.name}</span>
-                        </Link>
+                        <SheetClose asChild>
+                          <Link
+                            href={option.link}
+                            className="flex items-center gap-2 hover:bg-transparent rounded-md transition-all md:w-full w-[320px]"
+                          >
+                            {val}
+                            <span>{option.name}</span>
+                          </Link>
+                        </SheetClose>
                       </CommandItem>
                     );
                   })}

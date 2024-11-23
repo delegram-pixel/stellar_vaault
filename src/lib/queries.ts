@@ -7,6 +7,7 @@ import { Actions, Deposit, KYCVerification, Profile, Role, Withdrawal } from "@p
 import bcrypt from 'bcrypt'
 
 
+
 interface UpdateUserInput {
   country?: string;
   state?: string;
@@ -1071,172 +1072,178 @@ export async function getActivePlans() {
     where: { isActive: true },
   });
 }
-// Create a new investment
-export async function createInvestment(userId:string, planId: string, amount: number) {
-  try {
+// // Create a new investment
+// export async function createInvestment(userId:string, planId: string, amount: number) {
+//   try {
  
 
-    const plan = await client.plan.findUnique({ where: { id: planId } });
-    if (!plan) throw new Error("Plan not found");
+//     const plan = await client.plan.findUnique({ where: { id: planId } });
+//     if (!plan) throw new Error("Plan not found");
 
-    const user = await client.user.findUnique({
-      where: { clerkId: userId },
-    });
+//     const user = await client.user.findUnique({
+//       where: { clerkId: userId },
+//     });
     
-    if (!user) throw new Error("User not found");
+//     if (!user) throw new Error("User not found");
 
-    if (user.balance < amount) throw new Error("Insufficient balance");
-    if (amount < plan.minAmount || amount > plan.maxAmount) throw new Error("Invalid investment amount");
+//     if (user.balance < amount) throw new Error("Insufficient balance");
+//     if (amount < plan.minAmount || amount > plan.maxAmount) throw new Error("Invalid investment amount");
 
-    const endDate = calculateEndDate(plan.termDuration, plan.termDurationType);
+//     const endDate = calculateEndDate(plan.termDuration, plan.termDurationType);
 
-    return client.$transaction(async (tx) => {
-      // Create the investment
-      const investment = await tx.investment.create({
-        data: {
+//     return client.$transaction(async (tx) => {
+//       // Create the investment
+//       const investment = await tx.investment.create({
+//         data: {
           
-          userId,
-          planId,
-          amount,
-          endDate,
-        },
-      });
+//           userId,
+//           planId,
+//           amount,
+//           endDate,
+//         },
+//       });
 
-      // Deduct the amount from user's balance
-      await tx.user.update({
-        where: { clerkId: userId },
-        data: { balance: { decrement: amount } },
-      });
-
-
-      const transactionDetails = await client.transaction.create({
-        data: {
-          id: userId,
-          amount:  amount, 
-          status: "COMPLETED",
-          userId: userId,
-          type: "INVESTMENT",
-        },
-      });
-      return investment;
-    });
-  } catch (error) {
-    // Log the error for debugging purposes
-    console.error('Error creating investment:', error);
-
-    // Rethrow the error or handle it as needed
-    throw error;
-  }
-}
-
-export async function calculateInterest() {
-  const activeInvestments = await client.investment.findMany({
-    where: { status: "ACTIVE" },
-    include: { plan: true },
-  });
-
-  for (const investment of activeInvestments) {
-    const interestRate = investment.plan.interestRate / 100;
-    const dailyRate = interestRate / 365;
-    const daysActive = Math.floor((Date.now() - investment.startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const interest = investment.amount * dailyRate * daysActive;
-
-    await client.investment.update({
-      where: { id: investment.id },
-      data: { accumulatedInterest: interest },
-    });
-
-    if (new Date() >= investment.endDate) {
-      await completeInvestment(investment.id);
-    }
-  }
-}
-
-async function completeInvestment(investmentId: string) {
-  const investment = await client.investment.findUnique({
-    where: { id: investmentId },
-    include: { plan: true, user: true },
-  });
-
-  if (!investment) throw new Error("Investment not found");
-
-  const totalReturn = investment.amount + investment.accumulatedInterest;
-
-  await client.$transaction(async (tx) => {
-    await tx.investment.update({
-      where: { id: investmentId },
-      data: { status: "COMPLETED" },
-    });
-
-    await tx.user.update({
-      where: { id: investment.userId },
-      data: { balance: { increment: totalReturn } },
-    });
-  });
-}
-
-function calculateEndDate(duration: number, durationType: string): Date {
-  const endDate = new Date();
-  switch (durationType) {
-    case "days":
-      endDate.setDate(endDate.getDate() + duration);
-      break;
-    case "weeks":
-      endDate.setDate(endDate.getDate() + duration * 7);
-      break;
-    case "months":
-      endDate.setMonth(endDate.getMonth() + duration);
-      break;
-    case "years":
-      endDate.setFullYear(endDate.getFullYear() + duration);
-      break;
-    default:
-      throw new Error("Invalid duration type");
-  }
-  return endDate;
-}
-
-export async function getInvestments(userId: string) {
-  try {
-    const investments = await client.investment.findMany({
-      where: {
-        userId: userId,
-      },
-      include: {
-        plan: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-    return investments;
-  } catch (error) {
-    console.error('Error fetching investments:', error);
-    throw error;
-  }
-}
+//       // Deduct the amount from user's balance
+//       await tx.user.update({
+//         where: { clerkId: userId },
+//         data: { balance: { decrement: amount } },
+//       });
 
 
-export async function getUserInvestmentData(userId: string) {
-  const investments = await client.investment.findMany({
-    where: { userId: userId },
-    include: { plan: true }
-  });
+//       const transactionDetails = await client.transaction.create({
+//         data: {
+//           id: userId,
+//           amount:  amount, 
+//           status: "COMPLETED",
+//           userId: userId,
+//           type: "INVESTMENT",
+//         },
+//       });
+//       return investment;
+//     });
+//   } catch (error) {
+//     // Log the error for debugging purposes
+//     console.error('Error creating investment:', error);
 
-  const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
-  const totalProfit = investments.reduce((sum, inv) => sum + inv.accumulatedInterest, 0);
+//     // Rethrow the error or handle it as needed
+//     throw error;
+//   }
+// }
 
-  const user = await client.user.findUnique({
-    where: { id: userId },
-    select: { balance: true }
-  });
+// export async function calculateInterest() {
+//   const activeInvestments = await client.investment.findMany({
+//     where: { status: "ACTIVE" },
+//     include: { plan: true },
+//   });
 
-  return {
-    availableFunds: user?.balance || 0,
-    totalInvested,
-    totalProfit
-  };
-}
+//   for (const investment of activeInvestments) {
+//     const interestRate = investment.plan.interestRate / 100;
+//     const dailyRate = interestRate / 365;
+//     const daysActive = Math.floor((Date.now() - investment.startDate.getTime()) / (1000 * 60 * 60 * 24));
+//     const interest = investment.amount * dailyRate * daysActive;
+
+//     await client.investment.update({
+//       where: { id: investment.id },
+//       data: { accumulatedInterest: interest },
+//     });
+
+//     if (new Date() >= investment.endDate) {
+//       await completeInvestment(investment.id);
+//     }
+//   }
+// }
+
+// async function completeInvestment(investmentId: string) {
+//   const investment = await client.investment.findUnique({
+//     where: { id: investmentId },
+//     include: { plan: true, user: true },
+//   });
+
+//   if (!investment) throw new Error("Investment not found");
+
+//   const totalReturn = investment.amount + investment.accumulatedInterest;
+
+//   await client.$transaction(async (tx) => {
+//     await tx.investment.update({
+//       where: { id: investmentId },
+//       data: { status: "COMPLETED" },
+//     });
+
+//     await tx.user.update({
+//       where: { id: investment.userId },
+//       data: { balance: { increment: totalReturn } },
+//     });
+//   });
+// }
+
+// function calculateEndDate(duration: number, durationType: string): Date {
+//   const endDate = new Date();
+//   switch (durationType) {
+//     case "days":
+//       endDate.setDate(endDate.getDate() + duration);
+//       break;
+//     case "weeks":
+//       endDate.setDate(endDate.getDate() + duration * 7);
+//       break;
+//     case "months":
+//       endDate.setMonth(endDate.getMonth() + duration);
+//       break;
+//     case "years":
+//       endDate.setFullYear(endDate.getFullYear() + duration);
+//       break;
+//     default:
+//       throw new Error("Invalid duration type");
+//   }
+//   return endDate;
+// }
+
+// export async function getInvestments(userId: string) {
+//   try {
+//     const investments = await client.investment.findMany({
+//       where: {
+//         userId: userId,
+//       },
+//       include: {
+//         plan: true,
+//       },
+//       orderBy: {
+//         createdAt: 'desc',
+//       },
+//     });
+//     return investments;
+//   } catch (error) {
+//     console.error('Error fetching investments:', error);
+//     throw error;
+//   }
+// }
+
+
+// export async function getUserInvestmentData(userId: string) {
+//   const investments = await client.investment.findMany({
+//     where: { userId: userId },
+//     include: { plan: true }
+//   });
+
+//   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+//   const totalProfit = investments.reduce((sum, inv) => sum + inv.accumulatedInterest, 0);
+
+//   const user = await client.user.findUnique({
+//     where: { id: userId },
+//     select: { balance: true }
+//   });
+
+//   return {
+//     availableFunds: user?.balance || 0,
+//     totalInvested,
+//     totalProfit
+//   };
+// }
+
+
+
+
+
+
 
 
 export async function PaymentDc(data: any) {
@@ -1384,3 +1391,168 @@ export async function UpdateBal(userId:string, data: number) {
 }
 
 
+
+export async function getInvestments(userId: string) {
+  try {
+    const investments = await client.investment.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        plan: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return investments;
+  } catch (error) {
+    console.error('Error fetching investments:', error);
+    throw error;
+  }
+}
+
+export async function getUserInvestmentData(userId: string) {
+  try {
+    // Get all investments for the user
+    const investments = await client.investment.findMany({
+      where: { 
+        userId: userId,
+        status: 'ACTIVE'  // Only consider active investments
+      },
+      include: { plan: true }
+    });
+
+    // Calculate real-time profits for each investment
+    const investmentsWithProfits = investments.map(investment => {
+      const interestRate = investment.plan.interestRate / 100;
+      const dailyRate = interestRate / 365;
+      const now = new Date();
+      const startDate = new Date(investment.startDate);
+      const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const currentProfit = investment.amount * dailyRate * daysActive;
+      
+      return {
+        ...investment,
+        currentProfit
+      };
+    });
+
+    // Get user's available balance
+    const user = await client.user.findUnique({
+      where: { clerkId: userId },
+      select: { balance: true }
+    });
+
+    // Calculate summary statistics
+    const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+    const totalProfit = investmentsWithProfits.reduce((sum, inv) => sum + inv.currentProfit, 0);
+
+    return {
+      availableFunds: user?.balance || 0,
+      totalInvested,
+      totalProfit
+    };
+  } catch (error) {
+    console.error('Error fetching user investment data:', error);
+    throw error;
+  }
+}
+
+export async function createInvestment(userId: string, planId: string, amount: number) {
+  try {
+    const plan = await client.plan.findUnique({ 
+      where: { id: planId } 
+    });
+    
+    if (!plan) throw new Error("Plan not found");
+
+    const user = await client.user.findUnique({
+      where: { clerkId: userId },
+    });
+    
+    if (!user) throw new Error("User not found");
+    if (user.balance < amount) throw new Error("Insufficient balance");
+    if (amount < plan.minAmount || amount > plan.maxAmount) throw new Error("Invalid investment amount");
+
+    // Calculate end date based on plan terms
+    const endDate = calculateEndDate(plan.termDuration, plan.termDurationType);
+
+    return await client.$transaction(async (tx) => {
+      // Create the investment
+      const investment = await tx.investment.create({
+        data: {
+          userId,
+          planId,
+          amount,
+          endDate,
+          status: 'ACTIVE'
+        },
+      });
+
+      // Deduct amount from user's balance
+      await tx.user.update({
+        where: { clerkId: userId },
+        data: { balance: { decrement: amount } },
+      });
+
+      // Record the transaction
+      await tx.transaction.create({
+        data: {
+          userId,
+          amount,
+          type: "INVESTMENT",
+          status: "COMPLETED",
+        },
+      });
+
+      return investment;
+    });
+  } catch (error) {
+    console.error('Error creating investment:', error);
+    throw error;
+  }
+}
+
+export async function getRealTimeInvestmentStats(investment: any) {
+  try {
+    const interestRate = investment.plan.interestRate / 100;
+    const dailyRate = interestRate / 365;
+    const now = new Date();
+    const startDate = new Date(investment.startDate);
+    const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      currentProfit: investment.amount * dailyRate * daysActive,
+      daysActive: Math.floor(daysActive),
+      daysRemaining: Math.max(0, Math.floor((new Date(investment.endDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))),
+      percentageComplete: Math.min(100, (daysActive / (investment.plan.termDuration || 1)) * 100)
+    };
+  } catch (error) {
+    console.error('Error calculating real-time stats:', error);
+    throw error;
+  }
+}
+
+function calculateEndDate(duration: number, durationType: string): Date {
+  const endDate = new Date();
+  switch (durationType.toLowerCase()) {
+    case 'days':
+      endDate.setDate(endDate.getDate() + duration);
+      break;
+    case 'weeks':
+      endDate.setDate(endDate.getDate() + duration * 7);
+      break;
+    case 'months':
+      endDate.setMonth(endDate.getMonth() + duration);
+      break;
+    case 'years':
+      endDate.setFullYear(endDate.getFullYear() + duration);
+      break;
+    default:
+      throw new Error("Invalid duration type");
+  }
+  return endDate;
+}
+
+// Add this hook to your components for real-time updates
