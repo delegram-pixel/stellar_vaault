@@ -1426,7 +1426,7 @@ export async function getUserInvestmentData(userId: string) {
     // Calculate real-time profits for each investment
     const investmentsWithProfits = investments.map(investment => {
       const interestRate = investment.plan.interestRate / 100;
-      const dailyRate = interestRate / 365;
+      const dailyRate = interestRate / 30 ;
       const now = new Date();
       const startDate = new Date(investment.startDate);
       const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -1517,7 +1517,7 @@ export async function createInvestment(userId: string, planId: string, amount: n
 export async function getRealTimeInvestmentStats(investment: any) {
   try {
     const interestRate = investment.plan.interestRate / 100;
-    const dailyRate = interestRate / 365;
+    const dailyRate = interestRate / 30 ;
     const now = new Date();
     const startDate = new Date(investment.startDate);
     const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));

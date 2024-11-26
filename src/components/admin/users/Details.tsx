@@ -271,7 +271,7 @@ const UserDetails: React.FC<UserDetailsProps> = async ({ user }) => {
                       </p>
                       <p className="text-sm text-blue-600">Investment Wallet</p>
                       <p className="text-xl font-semibold text-blue-700 mt-2">
-                      vest
+                      
                       </p>
                       <p className="text-sm text-blue-600">Active Investment</p>
                     </div>
