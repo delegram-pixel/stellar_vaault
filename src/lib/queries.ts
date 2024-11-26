@@ -1514,25 +1514,188 @@ export async function createInvestment(userId: string, planId: string, amount: n
   }
 }
 
+// export async function getRealTimeInvestmentStats(investment: any) {
+//   try {
+//     const interestRate = investment.plan.interestRate / 100;
+//     const dailyRate = interestRate / 30 ;
+//     const now = new Date();
+//     const startDate = new Date(investment.startDate);
+//     const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+//     return {
+//       currentProfit: investment.amount * dailyRate * daysActive,
+//       daysActive: Math.floor(daysActive),
+//       daysRemaining: Math.max(0, Math.floor((new Date(investment.endDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))),
+//       percentageComplete: Math.min(100, (daysActive / (investment.plan.termDuration || 1)) * 100)
+//     };
+//   } catch (error) {
+//     console.error('Error calculating real-time stats:', error);
+//     throw error;
+//   }
+// }
+
+// export async function getRealTimeInvestmentStats(investment: any) {
+//   const use = await currentUser();
+//   const userId = use.id;
+
+//   const user = await client.user.findUnique({
+//     where: { clerkId: userId },
+//   });
+        
+//   const userBalance = user?.balance;
+
+//   try {
+//     const now = new Date();
+//     const startDate = new Date(investment.startDate);
+//     const endDate = new Date(investment.endDate);
+
+//     // Check if the investment has reached or passed the end date
+//     const isInactive = now >= endDate;
+
+//     // If inactive, update the investment status in the database
+//     if (isInactive) {
+//       await client.investment.update({
+//         where: { id: investment.id },
+//         data: { 
+//           status: 'COMPLETED',
+//         }
+//       });
+//     }
+
+//     const interestRate = investment.plan.interestRate / 100;
+//     const dailyRate = interestRate / 30;
+//     const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+//     // Only calculate profit if the investment is still active
+//     const totalProfit = !isInactive 
+//       ? investment.amount * dailyRate * daysActive 
+//       : investment.amount * dailyRate * ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+//     // If the investment has reached the end date, update the user's balance
+//     if (isInactive) {
+//       const newUserBalance = Number((userBalance + totalProfit).toFixed(2));
+
+//       try {
+//         const updatedUser = await client.user.update({
+//           where: { clerkId: userId },
+//           data: {
+//             balance: {
+//               increment: totalProfit // Use increment instead of directly setting newUserBalance
+//             },
+//           },
+//         });
+   
+//         return updatedUser;
+//       } catch (error) {
+//         console.error('Error updating user balance:', error);
+//         throw error;
+//       }
+//     }
+
+//     return {
+//       currentProfit: totalProfit,
+//       daysActive: Math.floor(daysActive),
+//       daysRemaining: Math.max(0, Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))),
+//       percentageComplete: Math.min(100, (daysActive / (investment.plan.termDuration || 1)) * 100),
+//       isActive: !isInactive
+//     };
+//   } catch (error) {
+//     console.error('Error calculating real-time stats:', error);
+//     throw error;
+//   }
+// }
+
+
 export async function getRealTimeInvestmentStats(investment: any) {
+  const use = await currentUser();
+  const userId = use.id;
+
+  const user = await client.user.findUnique({
+    where: { clerkId: userId },
+  });
+        
+  const userBalance = user?.balance;
+
   try {
-    const interestRate = investment.plan.interestRate / 100;
-    const dailyRate = interestRate / 30 ;
     const now = new Date();
     const startDate = new Date(investment.startDate);
+    const endDate = new Date(investment.endDate);
+
+    // Check if the investment has reached or passed the end date
+    const isInactive = now >= endDate;
+
+    // Only process if the investment is not already completed
+    if (isInactive && investment.status !== 'COMPLETED') {
+      const interestRate = investment.plan.interestRate / 100;
+      const dailyRate = interestRate / 30;
+      const totalProfit = investment.amount * dailyRate * 
+        ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Update investment status
+      await client.investment.update({
+        where: { id: investment.id },
+        data: { 
+          status: 'COMPLETED',
+        }
+      });
+
+      // Update user balance
+      const updatedUser = await client.user.update({
+        where: { clerkId: userId },
+        data: {
+          balance: {
+            increment: totalProfit
+          },
+        },
+      });
+   
+      
+
+      if(updatedUser) {
+  
+
+        try {
+          const transactionDetails = await client.transaction.create({
+            data: {
+            
+              amount:  totalProfit || 0, 
+             
+              status: "COMPLETED",
+              userId: userId,
+              type: "INVESTMENT",
+            },
+          });
+        } catch (error) {
+          console.log(error);
+        }
+
+        
+
+        return updatedUser;
+      }
+    }
+
+    // For active investments, return current stats
     const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const interestRate = investment.plan.interestRate / 100;
+    const dailyRate = interestRate / 30;
+    const currentProfit = !isInactive 
+      ? investment.amount * dailyRate * daysActive 
+      : 0;
+
     return {
-      currentProfit: investment.amount * dailyRate * daysActive,
+      currentProfit: currentProfit,
       daysActive: Math.floor(daysActive),
-      daysRemaining: Math.max(0, Math.floor((new Date(investment.endDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))),
-      percentageComplete: Math.min(100, (daysActive / (investment.plan.termDuration || 1)) * 100)
+      daysRemaining: Math.max(0, Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))),
+      percentageComplete: Math.min(100, (daysActive / (investment.plan.termDuration || 1)) * 100),
+      isActive: !isInactive
     };
   } catch (error) {
     console.error('Error calculating real-time stats:', error);
     throw error;
   }
 }
+
 
 function calculateEndDate(duration: number, durationType: string): Date {
   const endDate = new Date();

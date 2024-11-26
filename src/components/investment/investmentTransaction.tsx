@@ -15,71 +15,64 @@ import { Investment } from '@prisma/client';
 import { onLoginUser } from '@/actions/auth';
 import { Spinner } from '../spinner';
 import { formatCurrency } from './FormatCurrency';
-// import { formatCurrency } from '@/lib/utils';
+import { getRealTimeInvestmentStats } from '@/lib/queries'; // Assume this is where the previous function is stored
 
 // Improved type for investment plan
 interface InvestmentPlan {
   id: string;
   name: string;
   interestRate: number;
+  termDuration: number;
   interestPeriod: 'hourly' | 'daily' | 'monthly' | 'yearly';
 }
 
-// Enhanced type for investment
+// Enhanced type for investment with real-time stats
 interface EnhancedInvestment extends Investment {
   plan: InvestmentPlan;
+  realTimeStats?: {
+    currentProfit: number;
+    daysActive: number;
+    daysRemaining: number;
+    percentageComplete: number;
+    isActive: boolean;
+  };
 }
 
-// Custom hook for real-time profit calculation with memoization
-const useRealTimeProfit = (investment: EnhancedInvestment) => {
-  const calculateProfit = useMemo(() => {
-    if (!investment) return () => 0;
-
-    return () => {
-      const interestRate = investment.plan.interestRate / 100;
-      const now = new Date();
-      const startDate = new Date(investment.startDate);
-      const daysActive = Math.max(0, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
-      const getPeriodMultiplier = () => {
-        switch (investment.plan.interestPeriod) {
-          case 'hourly': return 1 / 24;
-          case 'daily': return 1 / 30 ;
-          case 'monthly': return 1 / 30;
-          case 'yearly': return 1 / 365;
-          default: return 0;
-        }
-      };
-
-      const dailyRate = interestRate * getPeriodMultiplier();
-      return investment.amount * dailyRate * daysActive;
-    };
-  }, [investment]);
-
-  const [profit, setProfit] = useState(calculateProfit());
+// Custom hook for real-time investment stats
+const useRealTimeInvestmentStats = (investment: EnhancedInvestment) => {
+  const [stats, setStats] = useState<EnhancedInvestment['realTimeStats']>();
 
   useEffect(() => {
-    if (!investment) return;
+    const fetchRealTimeStats = async () => {
+      try {
+        const realTimeStats = await getRealTimeInvestmentStats(investment);
+        setStats(realTimeStats);
+      } catch (error) {
+        console.error('Error fetching real-time stats:', error);
+      }
+    };
 
-    const updateProfit = () => setProfit(calculateProfit());
-    updateProfit(); // Initial calculation
+    // Initial fetch
+    fetchRealTimeStats();
 
-    const interval = setInterval(updateProfit, 1000);
+    // Set up interval for periodic updates
+    const interval = setInterval(fetchRealTimeStats, 60000); // Update every minute
     return () => clearInterval(interval);
-  }, [calculateProfit, investment]);
+  }, [investment]);
 
-  return profit;
+  return stats;
 };
 
 // Investment Table Row Component
 const InvestmentTableRow: React.FC<{ investment: EnhancedInvestment }> = ({ investment }) => {
-  const currentProfit = useRealTimeProfit(investment);
+  const realTimeStats = useRealTimeInvestmentStats(investment);
   
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'default';
       case 'completed': return 'secondary';
       case 'pending': return 'outline';
+      case 'inactive': return 'destructive';
       default: return 'destructive';
     }
   };
@@ -93,7 +86,7 @@ const InvestmentTableRow: React.FC<{ investment: EnhancedInvestment }> = ({ inve
         {formatCurrency(investment.amount)}
       </TableCell>
       <TableCell className="text-green-600">
-        {formatCurrency(currentProfit)}
+        {formatCurrency(realTimeStats?.currentProfit || 0)}
       </TableCell>
       <TableCell>
         <Badge variant={getStatusBadgeVariant(investment.status)}>
@@ -106,6 +99,14 @@ const InvestmentTableRow: React.FC<{ investment: EnhancedInvestment }> = ({ inve
       <TableCell>
         {new Date(investment.endDate).toLocaleDateString()}
       </TableCell>
+      <TableCell>
+        {realTimeStats?.daysActive || 0} / {realTimeStats?.daysRemaining || 0} days
+      </TableCell>
+      <TableCell>
+  {(realTimeStats && realTimeStats.percentageComplete !== undefined) 
+    ? realTimeStats.percentageComplete.toFixed(2) 
+    : 0}%
+</TableCell>
     </TableRow>
   );
 };
@@ -147,7 +148,7 @@ const InvestmentTable: React.FC = () => {
     if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="text-center">
+          <TableCell colSpan={8} className="text-center">
             <Spinner />
           </TableCell>
         </TableRow>
@@ -157,7 +158,7 @@ const InvestmentTable: React.FC = () => {
     if (error) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="text-center text-red-500">
+          <TableCell colSpan={8} className="text-center text-red-500">
             {error}
           </TableCell>
         </TableRow>
@@ -167,7 +168,7 @@ const InvestmentTable: React.FC = () => {
     if (!investments.length) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="text-center text-gray-500">
+          <TableCell colSpan={8} className="text-center text-gray-500">
             No investments found
           </TableCell>
         </TableRow>
@@ -192,6 +193,8 @@ const InvestmentTable: React.FC = () => {
           <TableHead>Status</TableHead>
           <TableHead>Start Date</TableHead>
           <TableHead>End Date</TableHead>
+          <TableHead>Days</TableHead>
+          <TableHead>Progress</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -25,7 +25,7 @@ const WithdrawSec =  async () => {
 
           <div className="">
             <div className="flex gap-2 mt-4">
-              <p className="text-2xl font-bold"> {getBalance.balance}.00 </p>
+              <p className="text-2xl font-bold"> {getBalance.balance.toFixed(2)} </p>
               <p className="mt-1"> USD</p>
             </div>
             <p className="text-sm font-normal">Available </p>

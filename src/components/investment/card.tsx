@@ -40,7 +40,7 @@ const InvestmentCard = () => {
           <p>Investment Account</p>
           <div>
             <div className="flex gap-2 mt-4">
-              <p className="text-2xl font-bold">${investmentData.availableFunds}</p>
+              <p className="text-2xl font-bold">${investmentData.availableFunds.toFixed(2)}</p>
               <p className="mt-1">USD</p>
             </div>
             <p className="text-sm font-normal">Available Funds</p>
