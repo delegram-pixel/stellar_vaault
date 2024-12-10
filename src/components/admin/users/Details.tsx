@@ -267,8 +267,8 @@ const UserDetails: React.FC<UserDetailsProps> = async ({ user }) => {
                         INVESTED ACCOUNT
                       </h3>
                       <p className="text-3xl font-bold text-blue-700">
-                        0.00 USD
-                      </p>
+  {user.investments.reduce((total, investment) => total + investment.amount, 0).toFixed(2)} USD
+</p>
                       <p className="text-sm text-blue-600">Investment Wallet</p>
                       <p className="text-xl font-semibold text-blue-700 mt-2">
                       
