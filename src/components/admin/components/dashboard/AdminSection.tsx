@@ -24,7 +24,7 @@ const AdminSection = async () => {
 
   return (
     <div className="w-full p-4 space-y-6">
-      {/* Main Grid Layout */}
+      {/* Main Grid Layout */} 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* Left Section - Transactions and Investments */}
         <div className="xl:col-span-7 space-y-6">

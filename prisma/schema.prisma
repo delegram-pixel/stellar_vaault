@@ -26,9 +26,23 @@ model User {
   kyc               KYCVerification?
   referrals         Referral[]         @relation("Referrer")
   referredBy        Referral?          @relation("Referred")
+  Certificate      Certificate? 
   notifications     Notification[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+
+
+
+}
+
+
+model Certificate {
+  id               String    @id @default(uuid())
+  imageUrl         String
+  user             User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  userId           String      @unique
+  status          CertificateStatus @default(PENDING)
+
 }
 
 model Profile {
@@ -272,6 +286,12 @@ enum TransactionStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum CertificateStatus {
+  PENDING
+  VERIFIED
+  CANCELLED
 }
 
 enum InvestmentStatus {

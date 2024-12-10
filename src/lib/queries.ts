@@ -1,6 +1,6 @@
 "use server";
 
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { client } from "./prisma";
 import { redirect } from "next/navigation";
 import { Actions, Deposit, KYCVerification, Profile, Role, Withdrawal } from "@prisma/client";
@@ -48,6 +48,12 @@ interface Kyc {
   idFrontUrl?: String,
   idBackUrl?: String,
   selfieUrl?: String,
+
+}
+
+interface Certificate {
+  imageUrl: string,
+
 
 }
 
@@ -282,6 +288,9 @@ export const KycVerification = async (userData: Kyc) => {
     throw error; // Re-throw the error so it can be handled by the caller
   }
 };
+
+
+
 
 export const getKyc = async () => {
   try {
@@ -1719,3 +1728,71 @@ function calculateEndDate(duration: number, durationType: string): Date {
 }
 
 // Add this hook to your components for real-time updates
+
+export async function checkUserCertificate() {
+  const { userId } = auth();
+  
+  if (!userId) return null;
+
+  const certificate = await client.certificate.findUnique({
+    where: { 
+      userId: userId,
+    },
+    select: {
+      status: true,
+      imageUrl: true
+    }
+  });
+
+  // If no certificate exists or imageUrl is null, return null
+  if (!certificate || !certificate.imageUrl) {
+    return null;
+  }
+
+  return certificate;
+}
+export async function uploadCertificate(formData: Certificate) {
+  const { userId } = auth();
+  
+  if (!userId) throw new Error("User not authenticated");
+
+  // Save certificate record
+  const certificate = await client.certificate.create({
+    data: {
+      ...formData,
+      userId,
+      status: 'PENDING', // Initially set to pending, admin will verify
+    }
+  });
+
+  return certificate;
+}
+
+
+
+// export const KycVerification = async (userData: Kyc) => {
+//   try {
+//     // Get the current user
+//     const user = await currentUser();
+//     if (!user) {
+//       throw new Error("Current user not found.");
+//     }
+
+//     // Update the user's profile
+//     const updateKyc = await client.kYCVerification.create({
+     
+//       data: {
+//         ...userData,
+//         userId: user.id,
+//         id: user.id,
+//         clerkId: user.id,
+//         updatedAt: new Date(), 
+//       },
+//     });
+
+//     return updateKyc;
+//   } catch (error) {
+//     console.error('Error Uploading Kyc:', error);
+//     throw error; // Re-throw the error so it can be handled by the caller
+//   }
+// };
