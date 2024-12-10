@@ -1796,3 +1796,72 @@ export async function uploadCertificate(formData: Certificate) {
 //     throw error; // Re-throw the error so it can be handled by the caller
 //   }
 // };
+
+
+
+export const getAllCert = async () => {
+  try {
+    const kyc = await client.certificate.findMany({
+      
+      include: { user: true },
+    });
+    return kyc;
+  } catch (error) {
+    console.error('Error fetching deposits:', error);
+    return [];
+  }
+};
+
+export const getAllCertbyId = async (userId:string) => {
+  try {
+    const kyc = await client.certificate.findMany({
+    
+      where: {
+        id: userId
+      },
+    });
+    return kyc;
+  } catch (error) {
+    console.error('Error fetching deposits:', error);
+    return [];
+  }
+};
+
+
+export const handleCertApprove = async (id: string) => {
+  try {
+    const updateStats = await client.certificate.update({
+      where: { id },
+      data: { status: 'VERIFIED' },
+    });
+
+
+  
+  
+    
+  
+
+ 
+
+    return updateStats;
+  } catch (error) {
+    console.error('Error  Stats:', error);
+    throw error;
+  }
+};
+
+export const handleCertNotApprove = async (id: string) => {
+  try {
+    const suspend = await client.certificate.update({
+      where: { id },
+      data: { status: 'REJECTED' },
+
+
+    });
+    return suspend;
+  } catch (error) {
+    console.error('Error  Suspending:', error);
+    throw error;
+  }
+};
+

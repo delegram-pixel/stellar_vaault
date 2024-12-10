@@ -42,6 +42,7 @@ const MenuOptions = ({ defaultOpen }: Props) => {
     { id: 6, name: 'Manage Users', icon: 'send', link: '/admin/users' },
     { id: 7, name: 'Payment Setting', icon: 'person', link: '/admin/profile' },
     { id: 7, name: 'Kyc Approval', icon: 'info', link: '/admin/verify' },
+    { id: 8, name: 'Doc Approval', icon: 'info', link: '/admin/docVerification' },
     { id: 9, name: 'Settings', icon: 'settings', link: '/admin/settings' },
   ];
 

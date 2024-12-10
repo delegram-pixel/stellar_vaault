@@ -291,7 +291,7 @@ enum TransactionStatus {
 enum CertificateStatus {
   PENDING
   VERIFIED
-  CANCELLED
+  REJECTED
 }
 
 enum InvestmentStatus {
