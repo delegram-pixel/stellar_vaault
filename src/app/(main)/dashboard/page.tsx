@@ -59,7 +59,7 @@ const getAllTransaction  = await getAlTransactions()
           <Card className="flex-1 relative">
             <CardHeader>
               <CardDescription>Balance</CardDescription>
-              <CardTitle className="text-4xl">${getBalances.balance}.00</CardTitle>
+              <CardTitle className="text-4xl">${getBalances.balance.toFixed(2)}</CardTitle>
               <small className="text-xs text-muted-foreground">
                 For the year {currentYear}
               </small>
